@@ -1,6 +1,6 @@
 package com.company.lambda;
 
-import com.company.Student;
+import com.company.data.Student;
 
 import java.util.Arrays;
 import java.util.List;

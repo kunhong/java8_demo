@@ -1,6 +1,6 @@
 package com.company.stream;
 
-import com.company.Student;
+import com.company.data.Student;
 
 import java.util.Arrays;
 import java.util.Iterator;
