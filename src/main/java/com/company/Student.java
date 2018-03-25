@@ -9,4 +9,5 @@ public class Student {
     private String name;
     private int englishScore;
     private int mathCore;
+    private String sex;
 }
