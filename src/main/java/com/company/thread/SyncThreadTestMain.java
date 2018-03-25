@@ -1,4 +1,4 @@
-package com.company;
+package com.company.thread;
 
 import com.company.thread.sync.Calculator;
 import com.company.thread.sync.User1;

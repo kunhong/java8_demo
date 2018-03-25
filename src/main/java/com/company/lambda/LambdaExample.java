@@ -1,4 +1,4 @@
-package com.company;
+package com.company.lambda;
 
 import com.company.lambda.MyFunctionalInterface;
 import com.company.lambda.MyFunctionalInterfaceReturn;

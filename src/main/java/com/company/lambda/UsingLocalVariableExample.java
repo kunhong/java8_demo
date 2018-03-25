@@ -1,0 +1,10 @@
+package com.company.lambda;
+
+import com.company.lambda.UsingLocalVariable;
+
+public class UsingLocalVariableExample {
+    public static void main(String[] args) {
+        UsingLocalVariable ulv = new UsingLocalVariable();
+        ulv.method(20);
+    }
+}

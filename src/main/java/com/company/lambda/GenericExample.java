@@ -1,4 +1,4 @@
-package com.company;
+package com.company.lambda;
 
 import com.company.generic.Box;
 import com.company.generic.Pair;

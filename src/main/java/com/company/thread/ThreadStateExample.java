@@ -1,4 +1,4 @@
-package com.company;
+package com.company.thread;
 
 import com.company.thread.StatePrintThread;
 import com.company.thread.TargetThread;
