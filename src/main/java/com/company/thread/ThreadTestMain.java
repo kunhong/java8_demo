@@ -1,10 +1,5 @@
 package com.company.thread;
 
-import com.company.thread.Task;
-import com.company.thread.ThreadA;
-import com.company.thread.WorkerThread;
-
-
 public class ThreadTestMain {
     public static void main(String[] args) {
 

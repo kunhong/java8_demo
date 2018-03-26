@@ -9,7 +9,7 @@ public class AsDoubleStreamAndBoxedExample {
 
         IntStream intStream = Arrays.stream(intArray);
         intStream
-                .asDoubleStream() // DoubleStream 생성 : int -> double, long -? double
+                .asDoubleStream() // DoubleStream 생성 : int -> double, long -> double
                 .forEach(System.out::println);
 
         intStream = Arrays.stream(intArray);

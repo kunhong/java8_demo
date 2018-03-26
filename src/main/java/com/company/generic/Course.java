@@ -9,7 +9,6 @@ package com.company.generic;
 // <? super 하위 타입>
 // 타입 파라미터를 대치하는 구체적인 타입으로 하위 타입이나 상위 타입만 올 수 있다.
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data

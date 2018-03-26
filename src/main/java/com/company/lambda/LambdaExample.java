@@ -1,9 +1,5 @@
 package com.company.lambda;
 
-import com.company.lambda.MyFunctionalInterface;
-import com.company.lambda.MyFunctionalInterfaceReturn;
-import com.company.lambda.MyFunctionalInterfaceWithParam;
-
 public class LambdaExample {
     public static int sum(int x, int y) {
         return x  + y;
