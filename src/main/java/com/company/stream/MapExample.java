@@ -4,6 +4,7 @@ import com.company.data.Student;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
 * mapXXX() 메소드는 요소를 대체하는 요소로 구성된 새로운 스트림을 리턴
@@ -26,6 +27,17 @@ public class MapExample {
 
         list.stream()
                 .mapToInt(Student::getEnglishScore)
+                .forEach(System.out::println);
+//        90
+//        20
+//        20
+//        20
+
+        List<String> names = list.stream()
+                .map(x -> x.getName())
+                .collect(Collectors.toList());
+
+        names.stream()
                 .forEach(System.out::println);
     }
 }
