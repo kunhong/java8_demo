@@ -4,6 +4,8 @@ package com.company.stream;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // flatMapXXX() 메소드는 요소를 대체하는 복수 개의 요소들로 구성된 새로운 스트림을 리턴한다.
 /*
@@ -14,6 +16,20 @@ import java.util.List;
 
 public class FlatMapExample {
     public static void main(String[] args) {
+        String[] arrayOfWords = {"Goodbye", "World"};
+        Stream<String> streamOfwords = Arrays.stream(arrayOfWords);
+
+        // flatMap은 각 배열의 스ㅡ림이 아니라 스트름의 콘텐츠로 매핑한다.
+        List<String> uniqueCharacters = streamOfwords
+                .map(word -> word.split(""))
+                .flatMap(Arrays::stream)
+                .distinct()
+                .collect(Collectors.toList());
+
+        uniqueCharacters.stream()
+                .forEach(System.out::println);
+
+
         List<String> inputList1 = Arrays.asList("java8 lambda", "stream mapping");
         inputList1.stream()
                 .flatMap(data -> Arrays.stream(data.split(" ")))
