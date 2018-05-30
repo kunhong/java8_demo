@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class Member {
     private String name;
     private String id;

@@ -3,9 +3,14 @@ package com.company.stream;
 import com.company.data.Dish;
 
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.groupingBy;
+
+
 public class Java8InActionExample {
+    public enum CaloricLevel {DIET, NORMAL, FAT}
     static List<Dish> menu = Arrays.asList(
             new Dish("pork", false, 800, Dish.Type.MEAT),
             new Dish("beef", false, 700, Dish.Type.MEAT),
@@ -18,6 +23,12 @@ public class Java8InActionExample {
             new Dish("salmon", false, 450, Dish.Type.FISH)
 
     );
+
+    // 제네릭 와일드 카드 '?' 사용법
+    // 컬렉터의 누적자 형식이 알려지지 않았음을, 즉 누적자의 형식이 자유로움을 의미
+    public static <T> Collector<T, ?, Long> counting() {
+        return Collectors.reducing(0L, e -> 1L, Long::sum);
+    }
 
     public static void main(String[] args) {
 
@@ -53,6 +64,53 @@ public class Java8InActionExample {
 
         System.out.println("shortMenu = " + shortMenu); // shortMenu = porkbeefchickenfrench friesriceseason fruitpizzeprawnssalmon
         System.out.println("shortMenu2 = " + shortMenu2); //shortMenu2 = pork, beef, chicken, french fries, rice, season fruit, pizze, prawns, salmon
-        
+
+        String shortMenu3 = menu.stream().map(Dish::getName).collect(Collectors.reducing((s1, s2) -> s1 + s2)).get();
+        System.out.println("shortMenu3 = " + shortMenu3); // shortMenu3 = porkbeefchickenfrench friesriceseason fruitpizzeprawnssalmon
+
+        String shortMenu4 = menu.stream().collect(Collectors.reducing("", Dish::getName, (s1, s2) -> s1 + s2));
+        System.out.println("shortMenu4 = " + shortMenu4); // shortMenu4 = porkbeefchickenfrench friesriceseason fruitpizzeprawnssalmon
+
+        // 범용 리듀싱 요약 연산
+        // Collectors.reducing
+        int totalCalories2 = menu.stream().collect(Collectors.reducing(0, Dish::getCalories, (i, j) -> i + j));
+        System.out.println("totalCalories2 : " + totalCalories2); // totalCalories2 : 4200
+
+        int totalCalories3 = menu.stream().collect(Collectors.reducing(0, // 초기값
+                Dish::getCalories, // 변환함수
+                Integer::sum)); // 합계 함수
+        System.out.println("totalCalories3 : " + totalCalories3); // totalCalories3 : 4200
+
+        int totalCalories4 = menu.stream().map(Dish::getCalories).reduce(Integer::sum).get();
+        System.out.println("totalCalories4 : " + totalCalories4); // totalCalories4 : 4200
+
+        // IntStream덕분에 자동 언박싱 연산을 수행하거나 Integer를 int로 변환하는 과정을 피할 수 있으므로 성능까지 좋다.
+        int totalCalories5 = menu.stream().mapToInt(Dish::getCalories).sum();
+        System.out.println("totalCalories5 : " + totalCalories5); // totalCalories5 : 4200
+
+        Optional<Dish> mostCaloriesDish = menu.stream().collect(Collectors.reducing((d1, d2) -> d1.getCalories() > d2.getCalories() ? d1 : d2));
+        System.out.println("mostCaloriesDish : " + mostCaloriesDish); // mostCaloriesDish : Optional[pork]
+
+        // collect : 도출하려는 결과를 누적하는 컨테이너를 바꾸도록 설계된 메서드
+        // reduce : 두 값을 하나로 도출하는 불변형 연산
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // 그룹화
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        Map<Dish.Type, List<Dish>> dishesByType = menu.stream()
+                .collect(groupingBy(Dish::getType));
+        System.out.println("dishesByType : " + dishesByType); // dishesByType : {MEAT=[pork, beef, chicken], FISH=[prawns, salmon], OTHER=[french fries, rice, season fruit, pizze]}
+
+        Map<CaloricLevel, List<Dish>> dishesByCaloricLevel = menu.stream()
+                .collect(groupingBy(dish -> {
+                    if (dish.getCalories() <= 400) return CaloricLevel.DIET;
+                    else if (dish.getCalories() <= 700) return CaloricLevel.NORMAL;
+                    else return CaloricLevel.FAT;
+                }));
+        System.out.println("dishesByCaloricLevel : " + dishesByCaloricLevel); // dishesByCaloricLevel : {FAT=[pork], DIET=[chicken, rice, season fruit, prawns], NORMAL=[beef, french fries, pizze, salmon]}
+
+
+
+
     }
 }
