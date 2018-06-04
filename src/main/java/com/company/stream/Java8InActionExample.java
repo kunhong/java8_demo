@@ -1,12 +1,14 @@
 package com.company.stream;
 
 import com.company.data.Dish;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import lombok.val;
 
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.*;
 
 
 public class Java8InActionExample {
@@ -107,7 +109,152 @@ public class Java8InActionExample {
                     else if (dish.getCalories() <= 700) return CaloricLevel.NORMAL;
                     else return CaloricLevel.FAT;
                 }));
-        System.out.println("dishesByCaloricLevel : " + dishesByCaloricLevel); // dishesByCaloricLevel : {FAT=[pork], DIET=[chicken, rice, season fruit, prawns], NORMAL=[beef, french fries, pizze, salmon]}
+        System.out.println("dishesByCaloricLevel : " + dishesByCaloricLevel);
+        // dishesByCaloricLevel :
+        // {FAT=[pork], DIET=[chicken, rice, season fruit, prawns],
+        // NORMAL=[beef, french fries, pizze, salmon]}
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // 다수준 그룹화
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //Map<Dish.Type, Map<CaloricLevel, List<Dish>>>
+        val dishesByTypeCaloricLevel = menu.stream()
+                .collect(groupingBy(Dish::getType,
+                        groupingBy(dish -> {
+                            if (dish.getCalories() <= 400) return CaloricLevel.DIET;
+                            else if (dish.getCalories() <= 700) return CaloricLevel.NORMAL;
+                            else return CaloricLevel.FAT;
+                            })));
+
+        System.out.println("dishesByTypeCaloricLevel : " + dishesByTypeCaloricLevel);
+
+        //dishesByTypeCaloricLevel :
+        // {MEAT={FAT=[pork], DIET=[chicken], NORMAL=[beef]},
+        // FISH={DIET=[prawns], NORMAL=[salmon]},
+        // OTHER={DIET=[rice, season fruit], NORMAL=[french fries, pizze]}}
+
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        // 서브그룹으로 데이터 수집
+        //////////////////////////////////////////////////////////////////////////////////////////
+        Map<Dish.Type, Long> typesCount = menu.stream().collect(groupingBy(
+                Dish::getType, counting()
+        ));
+
+        System.out.println("typesCount : " + typesCount);
+        // typesCount : {MEAT=3, FISH=2, OTHER=4}
+
+        // 요리의 종류를 분류하는 컬렉터로 메뉴에서 가장 높은 칼로리를 가진 요리를 찾는 프로그램
+        Map<Dish.Type, Optional<Dish>> mostCaloricByType = menu.stream()
+                .collect(groupingBy(Dish::getType, maxBy(Comparator.comparingInt(Dish::getCalories))));
+        System.out.println("mostCaloricByType : " + mostCaloricByType);
+        // mostCaloricByType : {MEAT=Optional[pork], FISH=Optional[salmon], OTHER=Optional[pizze]}
+
+        // Note : groupBy 컬렉터는 스트림의 첫 번째 요소를 찾은 이후에야 그룹화 맵에 새로운 키를 추가한다.
+        // 결국 굳이 Optional 래퍼를 사용할 필요가 없다.
+
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        // 컬렉터 결과를 다른 형식에 적용하기
+        //////////////////////////////////////////////////////////////////////////////////////////
+        Map<Dish.Type, Dish> mostCaloricByType2 = menu.stream()
+                .collect(groupingBy(Dish::getType, // 분류 함수
+                        collectingAndThen(
+                                maxBy(Comparator.comparingInt(Dish::getCalories)), // 감싸인 컬렉터
+                                Optional::get // 변환 함수
+                        )));
+        // collectingAndThen : 적용할 컬렉터와 변환함수를 인수로 받아 다른 컬렉터로 반환
+        // 반환하는 컬렉터는 기존 컬렉터의 래퍼 역할을 하며 collect의 마지막 과정에서 변환함수로 자신이 반환하는 값을 매핑한다.
+        // 중요 : 리튜싱 컬렉터는 절대 Optional.empty()를 반환하지 않는다.
+        System.out.println("mostCaloricByType2 : " + mostCaloricByType2);
+        // mostCaloricByType2 : {MEAT=pork, FISH=salmon, OTHER=pizze}
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        // groupingBy 다른 컬렉터 예제
+        //////////////////////////////////////////////////////////////////////////////////////////
+        Map<Dish.Type, Integer> totalCaloriesByType = menu.stream()
+                .collect(groupingBy(Dish::getType,
+                        summingInt(Dish::getCalories)));
+        System.out.println("totalCaloriesByType : " + totalCaloriesByType);
+        // totalCaloriesByType : {MEAT=1900, FISH=750, OTHER=1550}
+
+        // mapping : 스트림의 인수를 변환하는 함수와 변환 함수의 결과 객체를 누적하는 컬렉터를 인수로 받는다.
+        // 입력 요소를 누적하기 전에 매핑 함수를 적용해서 다양한 형식의 객체를 주어진 형식의 컬렉터에 맞게 변환하는 역할을 한다.
+        // 각 요리 형식에 존재하는 모든 CaloricLevel값을 알고자 할때
+        Map<Dish.Type, Set<CaloricLevel>> caloricLevelByType = menu.stream()
+                .collect(
+                        groupingBy(Dish::getType, mapping( dish -> {
+                            if (dish.getCalories() <= 400) {
+                                return CaloricLevel.DIET;
+                            }
+                            else if (dish.getCalories() <= 700) {
+                                return CaloricLevel.NORMAL;
+                            }
+                            else {
+                                return CaloricLevel.FAT;
+                            }
+
+                        },
+                                toSet()))
+                );
+        System.out.println("caloricLevelByType : " + caloricLevelByType);
+        // caloricLevelByType : {MEAT=[FAT, DIET, NORMAL], FISH=[DIET, NORMAL], OTHER=[DIET, NORMAL]}
+
+        Map<Dish.Type, Set<CaloricLevel>> caloricLevelByType2 = menu.stream()
+                .collect(
+                        groupingBy(Dish::getType, mapping( dish -> {
+                                    if (dish.getCalories() <= 400) {
+                                        return CaloricLevel.DIET;
+                                    }
+                                    else if (dish.getCalories() <= 700) {
+                                        return CaloricLevel.NORMAL;
+                                    }
+                                    else {
+                                        return CaloricLevel.FAT;
+                                    }
+
+                                },
+                                toCollection(HashSet::new)))
+                );
+        System.out.println("caloricLevelByType2 : " + caloricLevelByType2);
+        // caloricLevelByType2 : {MEAT=[FAT, DIET, NORMAL], FISH=[DIET, NORMAL], OTHER=[DIET, NORMAL]}
+
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        // 분할 : partitioningBy
+        //////////////////////////////////////////////////////////////////////////////////////////
+        Map<Boolean, List<Dish>> partitionedMenu = menu.stream()
+                .collect(partitioningBy(Dish::isVegetarian));
+        System.out.println("partitionedMenu : " + partitionedMenu);
+        // partitionedMenu :
+        // {false=[pork, beef, chicken, prawns, salmon],
+        // true=[french fries, rice, season fruit, pizze]}
+        List<Dish> vegetarianDishes = partitionedMenu.get(true);
+
+        List<Dish> vegetarianDishes2 = menu.stream()
+                .filter(Dish::isVegetarian).collect(toList());
+
+
+        Map<Boolean, Map<Dish.Type, List<Dish>>> vegetarianDishesByType = menu.stream()
+                .collect(partitioningBy(Dish::isVegetarian,
+                        groupingBy(Dish::getType)));
+        System.out.println("vegetarianDishesByType : " + vegetarianDishesByType);
+        // vegetarianDishesByType :
+        // {false={MEAT=[pork, beef, chicken], FISH=[prawns, salmon]},
+        // true={OTHER=[french fries, rice, season fruit, pizze]}}
+
+        Map<Boolean, Dish> mostCaloricPartitionedByVegetarian = menu.stream()
+                .collect(partitioningBy(Dish::isVegetarian,
+                        collectingAndThen(maxBy(Comparator.comparingInt(Dish::getCalories)),
+                                Optional::get)));
+        System.out.println("mostCaloricPartitionedByVegetarian : " + mostCaloricPartitionedByVegetarian);
+        // mostCaloricPartitionedByVegetarian : {false=pork, true=pizze}
+
+
+
+
+
+
 
 
 
