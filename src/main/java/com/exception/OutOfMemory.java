@@ -10,6 +10,7 @@ package com.exception;
 // -XX:HeapDumpPath=./java_pid<pid>.hprof
 
 // -XX:+PrintClassHistogramAfterFullGC, -XX:+PrintClassHistogramBeforeFullGC
+// http://www.oracle.com/technetwork/java/javase/clopts-139448.html#gbzrr
 public class OutOfMemory {
     static final int SIZE=2*1024*1024;
 
