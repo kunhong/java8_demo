@@ -2,6 +2,13 @@ package com.crypto;
 
 // https://gist.github.com/swhp/7e58e42dfc79f0645f7f145c4a361672
 
+/*
+* Unsupported keysize or algorithm parameters.혹은, Illegal key size or default parameters.
+* http://kwonnam.pe.kr/wiki/java/jce
+*
+*
+*
+* */
 import java.security.SecureRandom;
 
 import javax.crypto.BadPaddingException;
@@ -60,7 +67,8 @@ public class AESAlgorithm {
         //generate IV
         this.ivBytes = cipher.getParameters().getParameterSpec(IvParameterSpec.class).getIV();
         byte[] encryptedText = cipher.doFinal(plainText.getBytes("UTF-8"));
-        return new Base64().encodeAsString(encryptedText);
+        return Base64.encodeBase64URLSafeString(encryptedText);
+        // return new Base64().encodeAsString(encryptedText);
     }
 
     /**
