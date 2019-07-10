@@ -15,6 +15,10 @@ public class HashMapExample {
         map.put("홍길동", 70);
         map.put("동장군", 60);
 
+        map.computeIfAbsent("홍건", old -> {
+            return 100;
+        });
+
         Set<String> keySet = map.keySet();
         Iterator<String> keyIterator = keySet.iterator();
         while(keyIterator.hasNext()) {
